@@ -33,10 +33,14 @@ else
     service httpd stop
 fi
 
+source /opt/certbot/bin/activate
+
 # Obtain the certificate using certbot
 certbot certonly --dns-cloudflare --dns-cloudflare-credentials "$CLOUDFLARE_INI" --dns-cloudflare-propagation-seconds \
     --email "$EMAIL" --agree-tos \
     -d "$WILDCARD_DOMAIN" -d "$DOMAIN" --non-interactive
+
+deactivate
 
 # Replace the FreeIPA certificate with the Let's Encrypt certificate
 cp /var/lib/ipa/certs/httpd.crt /var/lib/ipa/certs/httpd.crt.bkp
