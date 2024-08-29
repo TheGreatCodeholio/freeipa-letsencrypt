@@ -8,29 +8,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 WORKDIR=$(dirname "$(realpath $0)")
-EMAIL="ian@icarey.net"
+EMAIL=""
 CLOUDFLARE_INI="/root/cloudflare.ini"
 FQDN=$(hostname -f)
 DOMAIN=$(echo $FQDN | sed -e 's/^[^.]*\.//')
 WILDCARD_DOMAIN="*.$DOMAIN"
-
-CERTS=("isrgrootx1.pem" "isrg-root-x2.pem" "lets-encrypt-r3.pem" "lets-encrypt-e1.pem" "lets-encrypt-r4.pem" "lets-encrypt-e2.pem")
-
-# Download and install the Let's Encrypt CA certificates
-if [ ! -d "/etc/ssl/$FQDN" ]; then
-    mkdir -p "/etc/ssl/$FQDN"
-fi
-
-for CERT in "${CERTS[@]}"; do
-    if command -v wget &> /dev/null; then
-        wget -O "/etc/ssl/$FQDN/$CERT" "https://letsencrypt.org/certs/$CERT"
-    elif command -v curl &> /dev/null; then
-        curl -o "/etc/ssl/$FQDN/$CERT" "https://letsencrypt.org/certs/$CERT"
-    fi
-    ipa-cacert-manage install "/etc/ssl/$FQDN/$CERT"
-done
-
-ipa-certupdate
 
 ### cron
 # skip renewal if the cert is still valid for more than 30 days
@@ -60,6 +42,10 @@ certbot certonly --dns-cloudflare --dns-cloudflare-credentials "$CLOUDFLARE_INI"
 cp /var/lib/ipa/certs/httpd.crt /var/lib/ipa/certs/httpd.crt.bkp
 cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/ipa/certs/httpd.crt
 cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/ipa/private/httpd.key
+
+# Set proper permissions
+chown root:root /var/lib/ipa/private/httpd.key
+chmod 600 /var/lib/ipa/private/httpd.key
 
 # Restore SELinux contexts
 restorecon -v /var/lib/ipa/certs/httpd.crt
