@@ -34,9 +34,9 @@ else
 fi
 
 # Obtain the certificate using certbot
-certbot certonly --dns-cloudflare --dns-cloudflare-credentials "$CLOUDFLARE_INI" \
+certbot certonly --dns-cloudflare --dns-cloudflare-credentials "$CLOUDFLARE_INI" --dns-cloudflare-propagation-seconds \
     --email "$EMAIL" --agree-tos \
-    --domain "$WILDCARD_DOMAIN" --domain "$DOMAIN" --non-interactive
+    -d "$WILDCARD_DOMAIN" -d "$DOMAIN" --non-interactive
 
 # Replace the FreeIPA certificate with the Let's Encrypt certificate
 cp /var/lib/ipa/certs/httpd.crt /var/lib/ipa/certs/httpd.crt.bkp
