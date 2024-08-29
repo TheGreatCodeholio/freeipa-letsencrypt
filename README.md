@@ -1,9 +1,12 @@
 These two scripts try to automatically obtain and install Let's Encrypt certs
 to FreeIPA web interface.
 
+Modified to user certbot to get wildcard certificate using cloudflare-dns.
+
 To use it, do this:
 * BACKUP /var/lib/ipa/certs/ and /var/lib/ipa/private/ to some safe place (it contains private keys!)
 * clone/unpack all scripts somewhere
+* Set Cloudflare DNS API Key in /root/cloudflare.ini
 * set EMAIL variable in renew-le.sh
 * run setup-le.sh script once to prepare the machine. The script will:
   * install Let's Encrypt client package
